@@ -1,0 +1,109 @@
+# -- set POSTGRESQL_ADMIN_PASSWORD when creating a postgresql service and set it to root
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: developer-hub-rhel9
+  namespace: devhub
+  labels:
+    app: developer-hub-rhel9
+    app.kubernetes.io/component: developer-hub-rhel9
+    app.kubernetes.io/instance: developer-hub-rhel9
+    app.kubernetes.io/name: developer-hub-rhel9
+    app.kubernetes.io/part-of: developer-hub-rhel9-app
+    app.openshift.io/runtime: developer-hub-rhel9
+    app.openshift.io/runtime-namespace: devhub
+    app.openshift.io/runtime-version: latest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: developer-hub-rhel9
+  template:
+    metadata:
+      labels:
+        app: developer-hub-rhel9
+        deployment: developer-hub-rhel9
+    spec:
+      containers:
+        - name: developer-hub-rhel9
+          image: image-registry.openshift-image-registry.svc:5000/devhub/developer-hub-rhel9@sha256:137d428d9fa14003e8c01c45c232c7fe642abe0769f450670bba033930937a71
+          ports:
+            - containerPort: 7007
+              protocol: TCP
+          env:
+            - name: K8S_ENABLED
+              value: 'false'
+            - name: TECHDOCS_ENABLED
+              value: 'false'
+            - name: ARGOCD_ENABLED
+              value: 'false'
+            - name: SONARQUBE_ENABLED
+              value: 'false'
+            - name: KEYCLOAK_ENABLED
+              value: 'false'
+            - name: OCM_ENABLED
+              value: 'false'
+            - name: GITHUB_ENABLED
+              value: 'false'
+            - name: GITHUB_ORG_ENABLED
+              value: 'false'
+            - name: GITLAB_ENABLED
+              value: 'false'
+            - name: AZURE_ENABLED
+              value: 'false'
+            - name: JENKINS_ENABLED
+              value: 'false'
+            - name: POSTGRES_HOST
+              value: 'postgres.devhub.svc.cluster.local'
+            - name: POSTGRES_PASSWORD
+              value: 'root'
+            - name: POSTGRES_USER
+              value: 'postgres'
+            - name: POSTGRES_PORT
+              value: '5432'
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: developer-hub-rhel9
+  namespace: devhub
+  labels:
+    app: developer-hub-rhel9
+    app.kubernetes.io/component: developer-hub-rhel9
+    app.kubernetes.io/instance: developer-hub-rhel9
+    app.kubernetes.io/name: developer-hub-rhel9
+    app.kubernetes.io/part-of: developer-hub-rhel9-app
+    app.openshift.io/runtime: developer-hub-rhel9
+    app.openshift.io/runtime-namespace: devhub
+    app.openshift.io/runtime-version: latest
+spec:
+  selector:
+    app: developer-hub-rhel9
+  ports:
+    - name: the-port
+      protocol: TCP
+      port: 7007
+      targetPort: 7007
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: developer-hub-rhel9
+  namespace: devhub
+  labels:
+    app: developer-hub-rhel9
+    app.kubernetes.io/component: developer-hub-rhel9
+    app.kubernetes.io/instance: developer-hub-rhel9
+    app.kubernetes.io/name: developer-hub-rhel9
+    app.kubernetes.io/part-of: developer-hub-rhel9-app
+    app.openshift.io/runtime: developer-hub-rhel9
+    app.openshift.io/runtime-namespace: devhub
+    app.openshift.io/runtime-version: latest
+spec:
+  to:
+    kind: Service
+    name: developer-hub-rhel9
+  port:
+    targetPort: the-port
